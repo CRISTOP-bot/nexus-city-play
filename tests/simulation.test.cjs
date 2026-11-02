@@ -110,10 +110,12 @@ test('public service policy improves health only when the city can afford servic
  assert.ok(world.agents.some(a=>a.needs.health>.5));assert.ok(world.treasury<200);
 });
 test('bankrupted essential supplier is restarted only through funded recovery',()=>{
- const {context}=makeContext(),world=context.createCity(10,4);context.__setCity(world);const f=world.firms.find(x=>x.good==='food');
- for(const other of world.firms)if(other.good==='food')other.active=false;
- f.active=true;f.cash=-2;world.treasury=0;context.tick(1);assert.equal(f.active,false);
- world.day=29;world.treasury=10000;context.tick(1);assert.ok(world.firms.some(x=>x.good==='food'&&x.active));
+ const {context}=makeContext(),world=context.createCity(10,4);context.__setCity(world);const suppliers=world.firms.filter(x=>x.good==='food');
+ for(const firm of suppliers){firm.active=false;firm.inventory=0;firm.cash=-10;}
+ const bankrupt=suppliers[0];bankrupt.active=true;world.treasury=0;world.day=1;
+ context.processBusinessFailures([bankrupt],new Map());assert.equal(bankrupt.active,false);
+ world.day=30;world.treasury=10000;context.processBusinessFailures([],new Map());
+ assert.ok(suppliers.some(x=>x.active&&x.cash>0));assert.ok(world.treasury<10000);
 });
 test('economic actions keep need, price and individual money within valid bounds',()=>{
  const {context}=makeContext(),world=context.createCity(120,516);context.__setCity(world);context.tick(365);
@@ -125,7 +127,7 @@ test('economic actions keep need, price and individual money within valid bounds
 });
 test('older saved worlds without firms or buildings migrate without crashing a tick',()=>{
  const {context}=makeContext(),world=context.createCity(20,6);world.firms=[];world.buildings=[];world.relationships=[];
- const migrated=context.migrateCity(world);context.__setCity(migrated);assert.doesNotThrow(()=>context.tick(3));
+ const migrated=context.migrateCity(world);assert.ok(migrated.buildings.some(b=>b.kind==='housing'));context.__setCity(migrated);assert.doesNotThrow(()=>context.tick(3));
  assert.equal(migrated.day,3);assert.ok(migrated.agents.every(a=>a.needs&&a.brain));
 });
 

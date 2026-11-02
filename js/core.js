@@ -53,10 +53,11 @@ function createCity(population = 240, seed = 42) {
   };
   const buildingNames = ['Plaza Central','Barrio Norte','Mercado','Distrito Solar','Escuela','Parque del Río'];
   const buildingKinds = ['civic','housing','market','industry','education','park','housing','industry','market','housing','education','housing'];
+  const housingCount = buildingKinds.filter(kind => kind === 'housing').length;
   for (let i = 0; i < 12; i++) world.buildings.push({
     id: `b${i}`, name: buildingNames[i % 6], kind: buildingKinds[i % 6],
     x: .12 + (i % 4) * .24, y: .15 + Math.floor(i / 4) * .3,
-    capacity: Math.max(24, population / 4), occupants: 0
+    capacity: buildingKinds[i % 6] === 'housing' ? Math.max(24, population / housingCount) : 0, occupants: 0
   });
   const goods = Object.keys(GOODS), firms = ['Sol','Horizonte','Cometa','Raíz','Lumen','Puente','Brisa','Marea','Nopal'];
   for (let i = 0; i < firms.length; i++) {
@@ -111,6 +112,9 @@ function migrateCity(world) {
     firm.employees ??= []; firm.active ??= true; firm.inventory ??= 0; firm.cash ??= 500;
     firm.building ??= world.buildings.find(building => ['market','industry'].includes(building.kind))?.id ?? world.buildings[0]?.id;
     firm.price ??= world.prices[firm.good] ?? GOODS[firm.good] ?? 1;
+  }
+  if (!world.buildings.some(building => building.kind === 'housing') && world.agents.length) {
+    for (let i = 0; i < 4; i++) world.buildings.push({ id:`migration-home-${i}`, name:`Barrio ${i+1}`, kind:'housing', x:.15+i*.22, y:.5, capacity:Math.max(24,world.agents.length/4), occupants:0 });
   }
   const occupancyByHome = new Map();
   for (const agent of world.agents) {

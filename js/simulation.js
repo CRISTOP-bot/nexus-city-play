@@ -248,7 +248,7 @@ function expandHousing() {
   const housing = city.buildings.filter(building => building.kind === 'housing');
   if (!housing.length || housing.reduce((sum, building) => sum + building.occupants, 0) / housing.reduce((sum, building) => sum + building.capacity, 0) < .9) return;
   const index = city.buildings.length;
-  const building = { id: `b${index}`, name: `Barrio ${index - 10}`, kind: 'housing', x: .1 + cityRandom() * .8, y: .1 + cityRandom() * .8, capacity: Math.max(24, city.agents.length / 4), occupants: 0 };
+  const building = { id: `b${index}`, name: `Barrio ${index - 10}`, kind: 'housing', x: .1 + cityRandom() * .8, y: .1 + cityRandom() * .8, capacity: Math.max(24, city.agents.length / Math.max(1, housing.length)), occupants: 0 };
   city.buildings.push(building);
   const residents = city.agents.filter(agent => housing.some(home => home.id === agent.home)).sort((a, b) => a.id.localeCompare(b.id));
   for (const resident of residents) {
