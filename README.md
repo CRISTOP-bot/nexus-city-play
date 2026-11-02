@@ -1,35 +1,29 @@
 # NEXUS CITY Web Edition
 
-Aplicación de navegador modular: no carga un motor de terceros, mantiene una edición ligera de la simulación en localStorage y publica estáticos con GitHub Pages.
+Aplicación modular de simulación en navegador, sin dependencias externas. La partida queda en localStorage de este navegador.
 
 ## Módulos
 
-- `index.html`: estructura y carga explícita de módulos en orden.
-- `css/app.css`: estilos responsive, fuera del HTML.
-- `js/core.js`: creación/migración de partida, RNG reproducible y persistencia.
-- `js/learning.js`: cerebros, decisiones, aprendizaje, memoria y enseñanza.
-- `js/simulation.js`: economía, empleo, relaciones, eventos, elecciones y expansión urbana.
-- `js/renderer3d.js`: WebGL, edificios, residentes y cámara.
-- `js/renderer-fallback.js`: mapa isométrico Canvas si WebGL no está o pierde contexto.
-- `js/view.js`: métricas, gráfica, eventos y lista de residentes.
-- `js/inspector.js`: perfil neuronal y enseñanza de habilidades.
-- `js/app.js`: interacciones y ciclo de vida de página.
-- `tests/`: pruebas Node.js integradas en GitHub Actions.
+- `index.html`, `css/app.css`: UI, estilos y carga ordenada.
+- `js/core.js`: mundo, habitantes, RNG reproducible, persistencia y migración.
+- `js/learning.js`: memoria episódica/semántica, preferencias, personalidad, aprendizaje, decisiones y enseñanza.
+- `js/simulation.js`: necesidades, acciones diarias, empleo, producción, comercio, política, sucesos, relaciones y vivienda.
+- `js/renderer3d.js`, `js/renderer-fallback.js`: ciudad WebGL voxel y respaldo isométrico.
+- `js/view.js`, `js/inspector.js`, `js/app.js`: tablero, inspector neuronal e interacción.
+- `tests/`: pruebas Node ejecutadas antes de publicar.
 
-## Desarrollo y validación
+## Mejoras de mecánicas (schema 4)
 
-Con Node.js 22+: `node --test tests/*.test.cjs`. El workflow además ejecuta `node --check` a todos los módulos. El despliegue de Pages espera a que el job de validación termine correctamente. En el contenedor usado para este cambio no hay Node ni navegador instalado; sí se comprobó la sintaxis de todos los módulos con el parser Tree-sitter JavaScript. Por eso no se declara que las pruebas Node se hayan ejecutado localmente; se ejecutarán en Actions.
+- Seis rasgos individuales: sociabilidad, ambición, frugalidad, curiosidad, empatía y responsabilidad. Influyen en elecciones, aprendizaje, cuidado y actividad social.
+- Necesidades ampliadas a alimento, energía, pertenencia, ropa, salud y estrés. El hambre deteriora salud; una buena alimentación y energía la recuperan poco a poco; descansar reduce estrés y fatiga.
+- Decisiones nuevas: comprar ropa, descansar, estudiar y ayudar económicamente a un vecino con bajos recursos. Aprender de éxitos y fracasos cambia los valores de acción y habilidades.
+- Relaciones evolucionan con conversaciones y ayuda; la ayuda genera recuerdos personales de gratitud y refuerza el vínculo.
+- Políticas y eventos repercuten en bienestar, salud, educación o estrés. Las elecciones/eventos conservan RNG determinista por ciudad.
+- El tablero mide bienestar incluyendo las necesidades nuevas; el inspector muestra personalidad y estado completo.
+- Migración transparente a schema 4 mantiene partidas anteriores y asigna defaults a campos nuevos.
 
-## Cambios de esta auditoría
+La vivienda inicial declara capacidad total para la población; la migración también recalcula ocupación desde las casas de cada residente. La economía de ropa se apoya en negocios existentes y el mercado local. El fondo municipal solo rescata a un proveedor esencial sin competencia cada 30 días y únicamente si el tesoro alcanza la subvención definida; el rescate queda registrado. El simulador sigue siendo una abstracción de agentes con reglas y aprendizaje acotado, no una IA general ni pathfinding físico. Los movimientos de peatones son visuales; el rendering limita instancias para no dibujar a toda la población en cada frame. La simulación corre en el hilo principal; el tamaño de población afecta el rendimiento y localStorage.
 
-- Separación del antiguo bundle único en HTML, CSS y módulos JS.
-- Renderer: única inicialización de WebGL; el render del HUD ya no intenta recrear canvas/contexto. El loop se inicia una vez; pérdida de contexto cae al renderer alternativo.
-- Menos trabajo por frame: lista de residentes dibujados acotada a ~700 (WebGL) o ~1.100 (fallback), con el seleccionado incluido.
-- Simulación: producción diaria y coste operativo; arreglado el comparador de precios que antes siempre empataba; socialización usa índices de hogar en vez de filtrar toda la ciudad por cada habitante; difusiones usan índice de residentes.
-- Gobierno y eventos usan RNG guardado en la partida, y se acotaron límites de días/estados.
-- Persistencia: esquema versión 2 migra partida anterior; administra fallos de JSON/localStorage con recuperación.
-- UX: modal seguro por delegación de eventos, accesibilidad del mapa y pausa del reloj en pestaña oculta.
+## Validación
 
-## Límites
-
-La escena muestra voxels 3D/Canvas isométrico, pero las rutas casa/trabajo son una abstracción visual de ciclo, no pathfinding en una malla ni puertas físicas. El fallback tiene geometría isométrica 2D. La edición web es separada de la DB Python. El sistema no es inteligencia general. Los agentes se procesan en el hilo principal; aunque el renderer limita los modelos visibles, la simulación y localStorage todavía requieren medición en teléfonos de poca memoria y en poblaciones grandes. No se ha afirmado un benchmark nuevo como resultado de esta auditoría.
+Node.js 22+: `node --test tests/*.test.cjs`. GitHub Actions también comprueba sintaxis y bloquea el deploy si falla una prueba. Las pruebas automatizadas no sustituyen la inspección visual en navegadores o teléfonos reales.
