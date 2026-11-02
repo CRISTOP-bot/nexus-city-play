@@ -142,8 +142,8 @@ function socialize(agent, residentsByHome, relationshipsByPair) {
   const key = pairKey(agent.id, other.id);
   const relationship = relationshipsByPair.get(key);
   if (relationship) relationship.score = Math.min(1, relationship.score + .02);
-  bondCacheDay = -1;
   else { const created = { a: agent.id, b: other.id, kind: 'amistad', score: .2 }; city.relationships.push(created); relationshipsByPair.set(key, created); }
+  bondCacheDay = -1;
   agent.needs.belonging = Math.min(1, agent.needs.belonging + .08);
   remember(agent, `Conversó con ${other.name}.`, 'social', .5);
   learn(agent, 'socialize', .35);
