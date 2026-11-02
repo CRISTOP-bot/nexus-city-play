@@ -8,12 +8,14 @@ function makeContext() {
   const storage = new Map();
   const context = vm.createContext({
     console, Math, Map, Set, Object, Array, String, Number, Boolean, JSON, Date, Float32Array,
+    globalThis: null,
     localStorage: { getItem:key=>storage.get(key)??null, setItem:(key,value)=>storage.set(key,value), removeItem:key=>storage.delete(key) },
     window:{devicePixelRatio:1,addEventListener(){}}, document:{addEventListener(){},hidden:false},
     requestAnimationFrame(){},setInterval,clearInterval,confirm:()=>true,alert(){}
   });
+  context.globalThis=context;
   for(const file of ['core.js','learning.js','simulation.js']) vm.runInContext(fs.readFileSync(path.join(__dirname,'..','js',file),'utf8'),context,{filename:file});
-  vm.runInContext('globalThis.getCity = () => city; globalThis.setCity = value => { city = value; }; globalThis.getGoods = () => GOODS; globalThis.getSaveKey = () => SAVE_KEY; globalThis.render = () => {}; globalThis.save = () => {};',context);
+  vm.runInContext('this.__getCity = () => city; this.__setCity = value => { city = value; }; this.__getGoods = () => GOODS; this.__getSaveKey = () => SAVE_KEY; this.render = () => {}; this.save = () => {};',context);
   return {context,storage};
 }
 
@@ -38,13 +40,13 @@ test('learned knowledge is attributable and experience affects action value',()=
 });
 test('old saved cities migrate without losing residents or initialize their brains',()=>{
  const {context,storage}=makeContext(),old=context.createCity(5,3);delete old.schema;for(const a of old.agents)delete a.brain;
- storage.set(context.getSaveKey(),JSON.stringify(old));context.load();const migrated=context.getCity();
+ storage.set(context.__getSaveKey(),JSON.stringify(old));context.load();const migrated=context.__getCity();
  assert.equal(migrated.agents.length,5);assert.ok(migrated.agents.every(a=>a.brain&&a.brain.semantic.employment));
 });
 test('daily simulation remains deterministic, bounded and records its calendar',()=>{
- const {context}=makeContext(),world=context.createCity(60,8);context.setCity(world);context.tick(8);const result=context.getCity();
+ const {context}=makeContext(),world=context.createCity(60,8);context.setCity(world);context.tick(8);const result=context.__getCity();
  assert.equal(result.day,8);assert.ok(result.history.length>=2);
- assert.ok(Object.entries(result.prices).every(([good,price])=>price>=context.getGoods()[good]*.35&&price<=context.getGoods()[good]*3));
+ assert.ok(Object.entries(result.prices).every(([good,price])=>price>=context.__getGoods()[good]*.35&&price<=context.__getGoods()[good]*3));
  assert.ok(result.events.some(event=>event.day===7));
 });
 test('skills transfer to a learner and must be mastered by the teacher',()=>{
