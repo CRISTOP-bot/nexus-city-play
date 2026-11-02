@@ -20,7 +20,7 @@ function activateFallback(reason) {
 }
 function renderFallbackFrame(time) {
   const canvas=$('map');if(!fallbackActive||!canvas)return;
-  const rect=canvas.getBoundingClientRect(),d=window.devicePixelRatio||1,w=Math.max(1,Math.floor(rect.width*d)),h=Math.max(1,Math.floor(rect.height*d));
+  const rect=canvas.getBoundingClientRect(),d=Math.min(window.devicePixelRatio||1,1.5),w=Math.max(1,Math.floor(rect.width*d)),h=Math.max(1,Math.floor(rect.height*d));
   if(canvas.width!==w||canvas.height!==h){canvas.width=w;canvas.height=h;}
   const ctx=canvas.getContext('2d');if(!ctx)return;ctx.setTransform(d,0,0,d,0,0);ctx.clearRect(0,0,rect.width,rect.height);ctx.fillStyle='#142128';ctx.fillRect(0,0,rect.width,rect.height);
   const cx=rect.width*.5,cy=rect.height*.55,scale=Math.min(rect.width/78,rect.height/55)*Math.max(.62,48/camDistance),yaw=camYaw,pitch=camPitch;

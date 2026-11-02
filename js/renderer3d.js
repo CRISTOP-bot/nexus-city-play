@@ -26,7 +26,14 @@ function compileShader(type, source) {
   if (!gl.getShaderParameter(shader, gl.COMPILE_STATUS)) throw Error(gl.getShaderInfoLog(shader));
   return shader;
 }
+function shouldUseMobileFallback(width, touchPoints = 0) {
+  return width <= 820 || (width <= 1024 && touchPoints > 0);
+}
 function init3D() {
+  if (shouldUseMobileFallback(window.innerWidth || 0, navigator.maxTouchPoints || 0)) {
+    activateFallback('modo compatible para celular');
+    return;
+  }
   try { initializeWebGL(); if (!gl) activateFallback('WebGL no disponible o bloqueado'); }
   catch (error) { console.error('WebGL no pudo iniciar:', error); gl = null; activateFallback(error.message); }
 }
@@ -50,6 +57,11 @@ function initializeWebGL() {
   canvas.addEventListener('pointermove', event => { if (!drag) return; const dx=event.clientX-drag.x,dy=event.clientY-drag.y; if (Math.abs(dx)+Math.abs(dy)>4) drag.moved=true; camYaw=drag.yaw-dx*.008; camPitch=Math.max(.22,Math.min(1.35,drag.pitch+dy*.006)); });
   canvas.addEventListener('pointerup', event => { if (drag && !drag.moved) { const rect=canvas.getBoundingClientRect(), hit=projectedAgents.find(person=>Math.hypot(person.x-(event.clientX-rect.left),person.y-(event.clientY-rect.top))<14); if (hit) openBrain(hit.id); } drag=null; });
   canvas.addEventListener('wheel', event => { event.preventDefault(); camDistance=Math.max(20,Math.min(78,camDistance+event.deltaY*.035)); }, { passive:false });
+}
+function ensureRendererForViewport() {
+  if (!fallbackActive && shouldUseMobileFallback(window.innerWidth || 0, navigator.maxTouchPoints || 0)) {
+    activateFallback('modo compatible para celular');
+  }
 }
 function start3DLoop() { if (!renderLoopStarted && !fallbackActive) { renderLoopStarted=true; requestAnimationFrame(safeFrame3D); } }
 function safeFrame3D(time) { try { renderFrame(time); } catch (error) { console.error('Escena WebGL:', error); activateFallback('fallo del controlador gráfico'); } }

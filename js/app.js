@@ -60,7 +60,7 @@ function bindUI() {
   });
   $('speed-slider').addEventListener('input', event => setSpeed(event.target.value));
   $('filter').addEventListener('input', renderPeople);
-  window.addEventListener('resize', () => city && renderChart());
+  window.addEventListener('resize', () => { ensureRendererForViewport(); if (city) renderChart(); });
   window.addEventListener('keydown', event => { if (event.key === 'Escape') closeBrain(); });
   document.addEventListener('visibilitychange', () => {
     if (document.hidden && running) { clearInterval(timer); timer = null; }

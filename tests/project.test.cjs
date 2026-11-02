@@ -14,6 +14,17 @@ test('HTML loads real separated app modules and has no inline event handlers',()
  assert.doesNotMatch(html,/<style\b/i);
 });
 
+test('phones choose the fallback before any WebGL context attempt',()=>{
+ const webgl=fs.readFileSync(path.join(root,'js/renderer3d.js'),'utf8');
+ const vm=require('node:vm');
+ const context=vm.createContext({Math,Float32Array,window:{innerWidth:390},navigator:{maxTouchPoints:5},console});
+ const harness=`let fallbackActive=false, fallbackReason=null, initialized=false;\nfunction activateFallback(reason){fallbackActive=true;fallbackReason=reason;}\n${webgl}\ninitializeWebGL=()=>{initialized=true;}; init3D();\nglobalThis.result={mobile:shouldUseMobileFallback(390,5),tabletTouch:shouldUseMobileFallback(900,1),desktop:shouldUseMobileFallback(1200,0),fallbackActive,fallbackReason,initialized};`;
+ vm.runInContext(harness,context);
+ assert.equal(context.result.mobile,true);assert.equal(context.result.tabletTouch,true);assert.equal(context.result.desktop,false);
+ assert.equal(context.result.fallbackActive,true);assert.equal(context.result.fallbackReason,'modo compatible para celular');assert.equal(context.result.initialized,false);
+ const fallback=fs.readFileSync(path.join(root,'js/renderer-fallback.js'),'utf8');assert.match(fallback,/Math\.min\(window\.devicePixelRatio\|\|1,1\.5\)/);
+});
+
 test('both rendering paths and browser-local persistence exist',()=>{
  const webgl=fs.readFileSync(path.join(root,'js/renderer3d.js'),'utf8');
  const fallback=fs.readFileSync(path.join(root,'js/renderer-fallback.js'),'utf8');

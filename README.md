@@ -8,7 +8,7 @@ Aplicación modular de simulación en navegador, sin dependencias externas. La p
 - `js/core.js`: mundo, habitantes, RNG reproducible, persistencia y migración.
 - `js/learning.js`: memoria episódica/semántica, preferencias, personalidad, aprendizaje, decisiones y enseñanza.
 - `js/simulation.js`: necesidades, acciones diarias, empleo, producción, comercio, política, sucesos, relaciones y vivienda.
-- `js/renderer3d.js`, `js/renderer-fallback.js`: ciudad WebGL voxel y respaldo isométrico.
+- `js/renderer3d.js`, `js/renderer-fallback.js`: ciudad WebGL voxel en escritorio y mapa isométrico Canvas en celulares/dispositivos sin WebGL; móvil limita la resolución de dibujo para reducir carga.
 - `js/view.js`, `js/inspector.js`, `js/app.js`: tablero, inspector neuronal e interacción.
 - `tests/`: pruebas Node ejecutadas antes de publicar.
 
@@ -26,4 +26,4 @@ La vivienda inicial declara capacidad total para la población; la migración ta
 
 ## Validación
 
-Node.js 22+: `node --test tests/*.test.cjs`. GitHub Actions también comprueba sintaxis y bloquea el deploy si falla una prueba. Las pruebas automatizadas no sustituyen la inspección visual en navegadores o teléfonos reales.
+Node.js 22+: `node --test tests/*.test.cjs`. GitHub Actions también comprueba sintaxis y bloquea el deploy si falla una prueba. En pantallas de hasta 820 px y tablets táctiles se selecciona el mapa Canvas antes de intentar WebGL; al estrechar una ventana desktop también se cambia al fallback. Las pruebas automatizadas verifican la selección del renderer y el workflow. Aún falta inspección visual manual en dispositivos Android/iOS reales; el fallback 2D es deliberadamente la opción de compatibilidad móvil.
