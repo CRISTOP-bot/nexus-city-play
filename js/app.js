@@ -18,6 +18,12 @@ function setTax() {
   record(city, 'government', `La administración fijó el impuesto en ${percent}%.`);
   save(); render();
 }
+function setPolicy() {
+  const policy = $('policy-select').value;
+  if (!['Servicios públicos','Educación comunitaria','Impulso a empresas'].includes(policy)) return;
+  if (city.policy === policy) return;
+  city.policy = policy; record(city, 'government', `La alcaldía adoptó la política: ${policy}.`); save(); render();
+}
 function election() {
   city.day++;
   city.mayor = ['Camila Cruz','Diego Flores','Maya Torres','Alicia Alvarez'][city.day % 4];
@@ -43,6 +49,7 @@ function bindUI() {
       case 'toggle-run': toggleRun(); break;
       case 'reset': resetCity(); break;
       case 'set-tax': setTax(); break;
+    case 'set-policy': setPolicy(); break;
       case 'election': election(); break;
       case 'close-brain': closeBrain(); break;
       case 'teach': teach(action.dataset.teacher); break;

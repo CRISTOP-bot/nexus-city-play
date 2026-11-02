@@ -41,3 +41,8 @@ test('shared DOM helper is defined before the app boots',()=>{
  assert.ok(fs.readFileSync(path.join(root,'index.html'),'utf8').indexOf('js/core.js') < fs.readFileSync(path.join(root,'index.html'),'utf8').indexOf('js/app.js'));
  assert.match(app,/bindUI\(\);\s*load\(\);/);
 });
+
+test('government panel exposes player-selectable policies and the app handles action',()=>{
+ const html=fs.readFileSync(path.join(root,'index.html'),'utf8'),app=fs.readFileSync(path.join(root,'js/app.js'),'utf8');
+ assert.match(html,/id="policy-select"/);assert.match(html,/data-action="set-policy"/);assert.match(app,/case 'set-policy': setPolicy\(\)/);
+});

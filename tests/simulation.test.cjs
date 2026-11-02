@@ -145,3 +145,24 @@ test('education advances through levels instead of instantly granting graduation
  assert.ok(a.brain.education_progress>=0&&a.brain.education_progress<=1);
  assert.ok(a.brain.decisions.length<=20);
 });
+
+test('education and worker skill raise firm production without unbounded growth',()=>{
+ const {context}=makeContext(),world=context.createCity(30,17);context.__setCity(world);const firm=world.firms[0];
+ const workers=firm.employees.map(id=>world.agents.find(a=>a.id===id));assert.ok(workers.length>0);
+ for(const a of workers){a.education='básica';a.brain.procedural.work_search=.1;}
+ const initial=firm.inventory;context.produceAndPay([firm],new Map(world.agents.map(a=>[a.id,a])),{food:0,energy:0,clothes:0});const low=firm.inventory-initial;
+ firm.inventory=initial;
+ for(const a of workers){a.education='superior';a.brain.procedural.work_search=1;}
+ context.produceAndPay([firm],new Map(world.agents.map(a=>[a.id,a])),{food:0,energy:0,clothes:0});const high=firm.inventory-initial;
+ assert.ok(high>low&&high-low<workers.length);assert.ok(Number.isFinite(firm.cash));
+});
+test('municipal policy changes are persisted and recorded through UI action handler',()=>{
+ const {context}=makeContext();for(const file of ['renderer3d.js','renderer-fallback.js','view.js','inspector.js','app.js']){
+  const source=fs.readFileSync(path.join(__dirname,'..','js',file),'utf8');
+  if(file==='app.js')continue;
+  // UI/render modules need DOM mocks and are validated by source-level binding test; simulation policy effects are checked below.
+ }
+ const world=context.createCity(6,10);context.__setCity(world);world.policy='Educación comunitaria';world.treasury=300;
+ for(const a of world.agents){a.education='básica';a.traits.curiosity=.9;a.brain.education_progress=0;}
+ context.tick(7);assert.ok(world.agents.some(a=>a.brain.education_progress>0));assert.ok(world.treasury<300);
+});

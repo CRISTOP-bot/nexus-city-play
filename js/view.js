@@ -13,6 +13,7 @@ function render() {
   $('date').textContent = 'Día ' + city.day;
   $('mayor').textContent = 'Alcaldía · ' + city.mayor;
   $('policy').textContent = city.policy;
+  if ($('policy-select')) $('policy-select').value = city.policy;
   $('taxinput').value = Math.round(city.tax_rate * 100);
   $('mapmeta').textContent = city.buildings.length + ' edificios · ' + city.agents.length + ' residentes';
   $('prices').innerHTML = Object.entries(city.prices).map(([good, price]) => `<div class="price">${{food:'Alimentos',energy:'Energía',clothes:'Ropa'}[good]}<b>${price.toFixed(2)} cr</b></div>`).join('');

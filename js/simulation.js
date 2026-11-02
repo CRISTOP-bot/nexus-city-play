@@ -14,20 +14,7 @@ function advanceDay() {
   for (const agent of city.agents) { if (!residentsByHome.has(agent.home)) residentsByHome.set(agent.home, []); residentsByHome.get(agent.home).push(agent); }
   const relationshipsByPair = new Map(city.relationships.map(relationship => [pairKey(relationship.a, relationship.b), relationship]));
 
-  for (const firm of activeFirms) {
-    const employees = firm.employees.map(id => agentsById.get(id)).filter(Boolean);
-    const produced = Math.max(1, employees.length * .3 + 1);
-    firm.inventory += produced;
-    if (Object.hasOwn(supply, firm.good)) supply[firm.good] += produced;
-    firm.cash -= 1.25 + employees.length * .04;
-    if (city.day % 7 === 0 && employees.length) {
-      const wage = Math.max(0, Math.min(18, firm.cash / employees.length));
-      for (const employee of employees) {
-        const tax = wage * Math.max(0, Math.min(.3, city.tax_rate));
-        employee.money += wage - tax; city.treasury += tax; firm.cash -= wage;
-      }
-    }
-  }
+  produceAndPay(activeFirms, agentsById, supply);
 
   for (const agent of city.agents) simulateAgent(agent, activeFirms, demand, residentsByHome, relationshipsByPair);
   updateMarket(activeFirms, demand, supply);
@@ -37,6 +24,23 @@ function advanceDay() {
   if (city.day % 7 === 0) spreadOneKnowledge();
   if (city.day % 30 === 0) expandHousing();
   if (city.day % 7 === 0) record(city, 'city', `Día ${city.day}: ${city.agents.length} residentes tomaron decisiones y comerciaron.`);
+}
+function produceAndPay(activeFirms, agentsById, supply) {
+  for (const firm of activeFirms) {
+    if (!Object.hasOwn(supply, firm.good)) continue;
+    const employees = firm.employees.map(id => agentsById.get(id)).filter(Boolean);
+    const skillBonus = employees.reduce((sum, worker) => sum + (worker.brain.procedural.work_search || .1) * .12 + (worker.education === 'superior' ? .08 : worker.education === 'media' ? .04 : 0), 0);
+    const produced = Math.max(1, employees.length * (.3 + (employees.length ? skillBonus / employees.length : 0)) + 1);
+    firm.inventory += produced; supply[firm.good] += produced;
+    firm.cash -= 1.25 + employees.length * .04;
+    if (city.day % 7 === 0 && employees.length) {
+      const wage = Math.max(0, Math.min(18, firm.cash / employees.length));
+      for (const employee of employees) {
+        const tax = wage * Math.max(0, Math.min(.3, city.tax_rate));
+        employee.money += wage - tax; city.treasury += tax; firm.cash -= wage;
+      }
+    }
+  }
 }
 function simulateAgent(agent, activeFirms, demand, residentsByHome, relationshipsByPair) {
   const options = [];
