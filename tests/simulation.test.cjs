@@ -27,7 +27,7 @@ test('same seed creates the same populated city and unique, bounded individual b
 });
 test('repeated economic failures change the next autonomous decision',()=>{
  const {context}=makeContext(),world=context.createCity(10,7);context.__setCity(world);const a=world.agents[0];
- a.traits.ambition=0;a.brain.preferences.saving=.15;a.needs.food=.9;a.needs.belonging=.9;
+ a.traits.ambition=0;a.brain.preferences.saving=.15;a.needs.food=.9;a.needs.belonging=.9;a.job=null;
  assert.equal(context.decide(a,['seek_work','save_money']).action,'seek_work');
  for(let i=0;i<4;i++)context.learn(a,'seek_work',-1);
  assert.equal(context.decide(a,['seek_work','save_money']).action,'save_money');
