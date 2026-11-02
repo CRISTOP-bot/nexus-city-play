@@ -1,6 +1,8 @@
 // Persistent world state, deterministic random numbers and initial civilization.
 'use strict';
 const SAVE_KEY = 'nexus-city-living-minds-v1';
+// Shared DOM lookup used by every UI and rendering module.
+function $(id) { return document.getElementById(id); }
 const GOODS = Object.freeze({ food: 8, energy: 5, clothes: 12 });
 const COLORS = Object.freeze({ civic: '#6ee7c5', housing: '#69aef2', market: '#f0c674', industry: '#f0c674', education: '#c58cf0', park: '#80cc8a' });
 const FIRST_NAMES = ['Alicia','Bruno','Camila','Diego','Elena','Fabian','Gabriela','Hugo','Ines','Javier','Karla','Luis','Maya','Nico','Olivia','Pablo','Renata','Sofia','Tomas','Valeria'];

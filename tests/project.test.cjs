@@ -33,3 +33,11 @@ test('workflows validate tests before publishing',()=>{
  const workflow=fs.readFileSync(path.join(root,'.github','workflows','pages.yml'),'utf8');
  assert.match(workflow,/needs: validate/);assert.match(workflow,/node --test tests\/\*.test\.cjs/);assert.match(workflow,/node --check/);
 });
+
+test('shared DOM helper is defined before the app boots',()=>{
+ const core=fs.readFileSync(path.join(root,'js/core.js'),'utf8');
+ const app=fs.readFileSync(path.join(root,'js/app.js'),'utf8');
+ assert.match(core,/function \$\(id\)\s*\{\s*return document\.getElementById\(id\);\s*\}/);
+ assert.ok(fs.readFileSync(path.join(root,'index.html'),'utf8').indexOf('js/core.js') < fs.readFileSync(path.join(root,'index.html'),'utf8').indexOf('js/app.js'));
+ assert.match(app,/bindUI\(\);\s*load\(\);/);
+});
