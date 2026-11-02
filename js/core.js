@@ -55,7 +55,7 @@ function createCity(population = 240, seed = 42) {
   const buildingKinds = ['civic','housing','market','industry','education','park','housing','industry','market','housing','education','housing'];
   const housingCount = buildingKinds.filter(kind => kind === 'housing').length;
   for (let i = 0; i < 12; i++) world.buildings.push({
-    id: `b${i}`, name: buildingNames[i % 6], kind: buildingKinds[i % 6],
+    id: `b${i}`, name: buildingNames[i % 6], kind: buildingKinds[i],
     x: .12 + (i % 4) * .24, y: .15 + Math.floor(i / 4) * .3,
     capacity: buildingKinds[i] === 'housing' ? Math.max(24, population / housingCount) : 0, occupants: 0
   });
