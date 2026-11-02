@@ -1,3 +1,3 @@
 # Nexus City Web Edition
 
-Juego/simulación autocontenida en `index.html`; se ejecuta en el navegador y guarda la partida en `localStorage`. Sin cuenta, dependencias, llamadas a servidores ni IA externa. El estado de esta edición web es independiente de la base SQLite de la edición Python.
+Juego de simulación de ciudad 3D en una sola página. Usa WebGL nativo, HTML/CSS/JavaScript sin dependencias externas. Residentes voxel siguen rutas cíclicas casa-trabajo y desaparecen al cruzar las puertas para representar que están dentro. Arrastra el mapa para orbitar; rueda para acercar/alejar; clic en un residente para abrir NEURAL INSPECTOR. La partida se guarda en localStorage de este navegador.
